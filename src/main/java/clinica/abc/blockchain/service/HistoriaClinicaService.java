@@ -1,8 +1,6 @@
 package clinica.abc.blockchain.service;
 
-import clinica.abc.blockchain.model.ContractGasProviderImpl;
-import clinica.abc.blockchain.model.Health;
-import clinica.abc.blockchain.model.HistoriaClinica;
+import clinica.abc.blockchain.model.*;
 import clinica.abc.blockchain.utils.HistoriaClinica_sol_HistoriaClinica;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -13,7 +11,10 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 
+import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -24,9 +25,9 @@ public class HistoriaClinicaService {
 
     private final Web3j web3j = Web3j.build(new HttpService("http://127.0.0.1:7545"));
     private final Credentials creds = Credentials.
-            create("c5f1edfa0b453107788eb7946b2141b9cab5f42efb1bad5d836590373dcb28bd");
+            create("fb658828492e0489a0f0da1bcd6c87af4bd5e0897104abf12324f0f610effec6");
     private final ContractGasProviderImpl gasProvider = new ContractGasProviderImpl();
-    private final String address = "0x400F0809851fBd0a583E86799055DCd06867a227";
+    private final String address = "0x8fAB1603e4aC958cb3357ea2749D89313abDA1A9";
     private final HistoriaClinica_sol_HistoriaClinica hcsc =
             HistoriaClinica_sol_HistoriaClinica.load(address, web3j, creds, gasProvider);
 
@@ -43,6 +44,22 @@ public class HistoriaClinicaService {
         }
     }
 
+    public TransactionReceipt registrarProcedimiento(Procedimiento procedimiento) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(procedimiento.toString().getBytes());
+            byte[] digest = md.digest();
+            HistoriaClinica hc = new HistoriaClinica(DatatypeConverter.printHexBinary(digest).toUpperCase(),
+                    Integer.parseInt(procedimiento.get_id()),
+                    System.currentTimeMillis());
+            log.info(hc.toString());
+            return addDocument(hc);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return new TransactionReceipt();
+        }
+    }
+
     public TransactionReceipt addDocument(HistoriaClinica hc) {
         try {
             TransactionReceipt receipt = hcsc.addDocument(
@@ -51,7 +68,7 @@ public class HistoriaClinicaService {
             return receipt;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return new TransactionReceipt();
         }
     }
 

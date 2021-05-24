@@ -2,11 +2,14 @@ package clinica.abc.blockchain.model;
 
 
 public class HistoriaClinica {
-    public String hash;
-    public int id;
-    public int timestamp;
+    private String hash;
+    private int id;
+    private long timestamp;
 
-    public HistoriaClinica(String hash, int id, int timestamp) {
+    public HistoriaClinica() {
+    }
+
+    public HistoriaClinica(String hash, int id, long timestamp) {
         this.hash = hash;
         this.id = id;
         this.timestamp = timestamp;
@@ -28,11 +31,11 @@ public class HistoriaClinica {
         this.id = id;
     }
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(int timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
